@@ -32,4 +32,6 @@ if [ "$COMMON_NAME" != "$REAL_NAME_UPPER" ]; then
 fi
 
 # Add attribute to user's Open Directory account for smartcard attribute matching
+## To do, the sudo is weird here, but I coudln't get it to run with sudo privs without putting it here.
+## I thought that the whole script would run with sudo privs without it.
 sudo dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$COMMON_NAME - $UPN"
