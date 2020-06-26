@@ -8,7 +8,9 @@ if [ -z "$HASH" ]; then
 fi
 
 # Get user certificate keyed off of fingerprint hash
-/usr/sbin/system_profiler SPSmartCardsDataType | grep -A8 "$HASH" | awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/ {print; count++; if (count==3) exit}' | fold -w67 > /tmp/temp.pem
+/usr/sbin/system_profiler SPSmartCardsDataType | grep -A8 "$HASH" \
+    | awk '/-----BEGIN CERTIFICATE-----/,/-----END CERTIFICATE-----/ {print; count++; if (count==3) exit}' \
+    | fold -w67 > /tmp/temp.pem
 
 # Get UPN and Common Name from the certificate
 UPN=`/usr/bin/openssl x509 -noout -text -in /tmp/temp.pem | awk -F ':' '/email/ {print $2}'`
@@ -21,3 +23,4 @@ USERNAME=$(dscl . -list /Users | grep -E "m(1|3)\w\w\w\d\d")
 dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$COMMON_NAME - $UPN"
 
 # To do
+# Prior to appending attribute, verify that Common Name matches RealName attribute in Open Directory
