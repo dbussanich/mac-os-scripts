@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 # Get PIV fingerprint hash
-HASH=`/usr/bin/security list-smartcards` | awk -F ':' '/com.apple.pivtoken/{print$2}'
+HASH=`/usr/bin/security list-smartcards| awk -F ':' '/com.apple.pivtoken/{print $2}'`
 
 if [ -z "$HASH" ]; then 
     return 1
@@ -25,9 +25,11 @@ REAL_NAME=$(dscl . -read /Users/${USERNAME} RealName)
 # Then compare Common Name to real name upper. If not equivalent, then wrong smart card is entered
 REAL_NAME_UPPER=`echo $REAL_NAME | awk '/RealName/{getline; print}' | sed 's/^ *//g' | tr '[:lower:]' '[:upper:]'`
 
+
 if [ "$COMMON_NAME" != "$REAL_NAME_UPPER" ]; then
+    echo "$COMMON_NAME NOT MATCHING WITH $REAL_NAME_UPPER"
     return 1
 fi
 
 # Add attribute to user's Open Directory account for smartcard attribute matching
-dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$COMMON_NAME - $UPN"
+sudo dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$COMMON_NAME - $UPN"
