@@ -1,11 +1,22 @@
 #!/bin/zsh
 
-# Get PIV fingerprint hash
-HASH=`/usr/bin/security list-smartcards| awk -F ':' '/com.apple.pivtoken/{print $2}'`
+function smartCardPrompt() {
+  osascript <<EOT
+    tell app "System Events"
+      display dialog "$1" buttons {"OK"} default button 1 with title "PIV Pair Utility"
+      return  -- Suppress result
+    end tell
+EOT
+}
 
-if [ -z "$HASH" ]; then 
-    return 1
-fi
+# Get PIV fingerprint hash
+HASH=`/usr/bin/security list-smartcards | awk -F ':' '/com.apple.pivtoken/{print $2}'`
+
+while [ -z "$HASH" ]; do 
+    smartCardPrompt "Please insert PIV card"
+    sleep 6
+    HASH=`/usr/bin/security list-smartcards | awk -F ':' '/com.apple.pivtoken/{print $2}'`
+done
 
 # Get user certificate keyed off of fingerprint hash
 /usr/sbin/system_profiler SPSmartCardsDataType | grep -A8 "$HASH" \
@@ -14,22 +25,24 @@ fi
 
 # Get UPN and Common Name from the certificate
 UPN=`/usr/bin/openssl x509 -noout -text -in /tmp/temp.pem | awk -F ':' '/email/ {print $2}'`
-COMMON_NAME=$(/usr/bin/openssl asn1parse -i -dump -in /tmp/temp.pem | awk -F ':' '/commonName/ {getline; print $4}')
+#COMMON_NAME=$(/usr/bin/openssl asn1parse -i -dump -in /tmp/temp.pem | awk -F ':' '/commonName/ {getline; print $4}')
+CURRENT_OPEN_DIRECTORY_VALUE=`dscl . -read /Users/m1dab01 dsAttrTypeNative:smartCardIdentity | awk '{print $2}'`
 
-# Use dscl command to query Open Directory to find user name with grep
-# Then, get real name from user name, convert to upper case
-USERNAME=$(dscl . -list /Users | grep -E "m(1|3)\w\w\w\d\d")
-REAL_NAME=$(dscl . -read /Users/${USERNAME} RealName | awk '/RealName/{getline; print}' \
-| sed 's/^ *//g' | tr '[:lower:]' '[:upper:]')
-
-# Then compare Common Name to real name upper. If not equivalent, then wrong smart card is entered
-
-if [ "$COMMON_NAME" != "$REAL_NAME" ]; then
-    echo "$COMMON_NAME NOT MATCHING WITH $REAL_NAME"
-    return 1
-fi
+if [ "$UPN" = "$CURRENT_OPEN_DIRECTORY_VALUE" ]; then
+    smartCardPrompt "Pairing already complete"
+    return 0
+fi    
 
 # Add attribute to user's Open Directory account for smartcard attribute matching
 ## To do, the sudo is weird here, but I coudln't get it to run with sudo privs without putting it here.
 ## I thought that the whole script would run with sudo privs without it.
 sudo dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$UPN"
+
+POST_PAIR_VALUE=`dscl . -read /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity | awk '{print $2}'`
+
+if [ "$UPN" != "$POST_PAIR_VALUE" ]; then
+    smartCardPrompt "Pairing failed, please contact Board Help Desk"
+    return 1
+fi  
+
+smartCardPrompt "PIV pairing complete"
