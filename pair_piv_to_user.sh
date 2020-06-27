@@ -33,7 +33,7 @@ UPN=`/usr/bin/openssl x509 -noout -text -in /tmp/temp.pem | awk -F ':' '/email/ 
 CURRENT_OPEN_DIRECTORY_VALUE=`dscl . -read /Users/m1dab01 dsAttrTypeNative:smartCardIdentity | awk '{print $2}'`
 
 if [ "$UPN" = "$CURRENT_OPEN_DIRECTORY_VALUE" ]; then
-    smartCardPrompt "Pairing already complete"
+    smartCardPrompt "Pairing already complete."
     return 0
 fi    
 
@@ -45,7 +45,7 @@ sudo dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$UPN"
 POST_PAIR_VALUE=`dscl . -read /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity | awk '{print $2}'`
 
 if [ "$UPN" != "$POST_PAIR_VALUE" ]; then
-    smartCardPrompt "Pairing failed, please contact Board Help Desk"
+    smartCardPrompt "Pairing failed, please contact Board Help Desk."
     return 1
 fi  
 
