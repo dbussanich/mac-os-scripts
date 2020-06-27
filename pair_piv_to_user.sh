@@ -18,14 +18,16 @@ if [ ! -f $SC_PLIST ]; then
     chmod 644 $SC_PLIST
 fi
 
+# Prompt to insert smart card. Sleep to allow time for PIV card to be read.
 smartCardPrompt "Please insert PIV card."
 sleep 4
 
 # Get PIV fingerprint hash
 HASH=`/usr/bin/security list-smartcards | awk -F ':' '/com.apple.pivtoken/{print $2}'`
 
+# If PIV card is not initially read, enter while loop.
 while [ -z "$HASH" ]; do 
-    sleep 6
+    sleep 4
     HASH=`/usr/bin/security list-smartcards | awk -F ':' '/com.apple.pivtoken/{print $2}'`
     if [ -z "$HASH" ]; then
         smartCardPrompt "PIV Card not read, please try again."
@@ -39,7 +41,6 @@ done
 
 # Get UPN and Common Name from the certificate
 UPN=`/usr/bin/openssl x509 -noout -text -in /tmp/temp.pem | awk -F ':' '/email/ {print $2}'`
-#COMMON_NAME=$(/usr/bin/openssl asn1parse -i -dump -in /tmp/temp.pem | awk -F ':' '/commonName/ {getline; print $4}')
 CURRENT_OPEN_DIRECTORY_VALUE=`dscl . -read /Users/m1dab01 dsAttrTypeNative:smartCardIdentity | awk '{print $2}'`
 
 if [ "$UPN" = "$CURRENT_OPEN_DIRECTORY_VALUE" ]; then
@@ -50,6 +51,7 @@ fi
 # Add attribute to user's Open Directory account for smartcard attribute matching
 dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$UPN"
 
+# Ensure that attribute was successfully added to user's account
 POST_PAIR_VALUE=`dscl . -read /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity | awk '{print $2}'`
 
 if [ "$UPN" != "$POST_PAIR_VALUE" ]; then
@@ -57,4 +59,5 @@ if [ "$UPN" != "$POST_PAIR_VALUE" ]; then
     return 1
 fi  
 
-smartCardPrompt "PIV pairing complete"
+# If successful, prompt complete
+smartCardPrompt "PIV pairing complete."
