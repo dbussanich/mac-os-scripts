@@ -38,9 +38,7 @@ if [ "$UPN" = "$CURRENT_OPEN_DIRECTORY_VALUE" ]; then
 fi    
 
 # Add attribute to user's Open Directory account for smartcard attribute matching
-## To do, the sudo is weird here, but I coudln't get it to run with sudo privs without putting it here.
-## I thought that the whole script would run with sudo privs without it.
-sudo dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$UPN"
+dscl . -append /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity "$UPN"
 
 POST_PAIR_VALUE=`dscl . -read /Users/${USERNAME} dsAttrTypeNative:smartCardIdentity | awk '{print $2}'`
 
