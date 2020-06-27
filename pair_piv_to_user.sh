@@ -9,13 +9,17 @@ function smartCardPrompt() {
 EOT
 }
 
+smartCardPrompt "Please insert PIV card."
+
 # Get PIV fingerprint hash
 HASH=`/usr/bin/security list-smartcards | awk -F ':' '/com.apple.pivtoken/{print $2}'`
 
 while [ -z "$HASH" ]; do 
-    smartCardPrompt "Please insert PIV card"
     sleep 6
     HASH=`/usr/bin/security list-smartcards | awk -F ':' '/com.apple.pivtoken/{print $2}'`
+    if [ -z "$HASH" ]; then
+        smartCardPrompt "PIV Card not read, please try again."
+    fi
 done
 
 # Get user certificate keyed off of fingerprint hash
