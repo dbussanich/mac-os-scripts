@@ -9,7 +9,17 @@ function smartCardPrompt() {
 EOT
 }
 
+
+# If /etc/SmartcardLogin.plist does not exist, copy to /etc
+SC_PLIST=/etc/SmartcardLogin.plist
+
+if [ ! -f $SC_PLIST ]; then
+    cp ./SmartcardLogin.plist /etc
+    chmod 644 $SC_PLIST
+fi
+
 smartCardPrompt "Please insert PIV card."
+sleep 3
 
 # Get PIV fingerprint hash
 HASH=`/usr/bin/security list-smartcards | awk -F ':' '/com.apple.pivtoken/{print $2}'`
