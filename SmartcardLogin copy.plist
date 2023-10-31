@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
      <dict>
+	<key>TrustedAuthorities</key>
+	<array>
+		<string>0200D4D2DB1AA4C1292101143E196CC9481E2CCD2A90FC4CB5ED81271FD308B1</string>
+		<string>6264514ADF9B6A1AC69746B00EF25D66CB5FBF261E5704C11E0B9C1CACD16954</string>
+		<string>894EBC0B23DA2A50C0186B7F8F25EF1F6B2935AF32A94584EF80AAF877A3A06E</string>
+	</array>
          <key>AttributeMapping</key>
          <dict>
              <key>fields</key>
@@ -12,8 +18,6 @@
              <string>$1</string>
              <key>dsAttributeString</key>
              <string>dsAttrTypeNative:smartCardIdentity</string>
-             <key>NotEnforced</key>
-             <string>piv_exempt</key>
          </dict>
      </dict>
 </plist>
