@@ -5,7 +5,7 @@
 while IFS=, read -r EMAIL FULLNAME NEWUSER ADMIN
 do
     # Create a new user with a username
-    sysadminctl -addUser $NEWUSER -fullName $FULLNAME -adminassword $PASS
+    sysadminctl -addUser $NEWUSER -fullName $FULLNAME -password $PASS -picture /Volumes/Thumb/thumbs/${NEWUSER:u}.jpg
     echo "Added user admin $NEWUSER"
     # Append NT Principal Name to user's account as ds Attribute
     dscl . -append /Users/${NEWUSER} dsAttrTypeNative:smartCardIdentity "$EMAIL"
