@@ -1,14 +1,13 @@
 #!/usr/bin/env zsh
 
-# Parses a JSON of users and adds those users to a macOS computer
+# Parses a CSV of users and adds those users to a macOS computer
 
-while IFS=, read -r EMAIL FULLNAME NEWUSER
+while IFS=, read -r EMAIL FULLNAME NEWUSER ADMIN
 do
     # Create a new user with a username
-    PASS=uuidgen
-    sysadminctl -addUser $NEWUSER -fullName $FULLNAME -password $PASS
-    echo "Added user $NEWUSER"
-    sleep 1
+    sysadminctl -addUser $NEWUSER -fullName $FULLNAME -adminassword $PASS
+    echo "Added user admin $NEWUSER"
+    # Append NT Principal Name to user's account as ds Attribute
     dscl . -append /Users/${NEWUSER} dsAttrTypeNative:smartCardIdentity "$EMAIL"
     echo "Added email $EMAIL to $NEWUSER dsattribute"
 done
