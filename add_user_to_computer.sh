@@ -12,3 +12,6 @@ do
     dscl . -append /Users/${NEWUSER} dsAttrTypeNative:smartCardIdentity "$EMAIL"
     echo "Added email $EMAIL to $NEWUSER dsattribute"
 done
+
+dseditgroup -o create piv_exempt
+dseditgroup -o edit -a infotech3000 -t user piv_exempt

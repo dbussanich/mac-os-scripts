@@ -1,1 +1,1 @@
-sudo dseditgroup -o edit -a infotech3000 -t user piv_exempt
+dseditgroup -o edit -a $AER -t user $GRUP
